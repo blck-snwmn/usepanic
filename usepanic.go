@@ -18,7 +18,7 @@ var Analyzer = &analysis.Analyzer{
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	// TODO use command line args
-	okPackage := map[string]struct{}{"main": {}}
+	allowPackages := map[string]struct{}{"main": {}}
 
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
@@ -33,7 +33,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		switch n := n.(type) {
 		case *ast.File:
 			packageName := n.Name.String()
-			if _, ok := okPackage[packageName]; ok {
+			if _, ok := allowPackages[packageName]; ok {
 				// if packageName exsit in `okPackage`, visit no children node.
 				return false
 			}
