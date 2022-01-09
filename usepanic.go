@@ -39,6 +39,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		case *ast.Ident:
 			if n.Name == "panic" {
+				// report if name is `panic` whether or not built-in function
 				pass.Reportf(n.Pos(), "don't use `panic` in this package.")
 			}
 		}
