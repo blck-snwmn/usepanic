@@ -2,6 +2,7 @@ package usepanic
 
 import (
 	"go/ast"
+	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -16,9 +17,37 @@ var Analyzer = &analysis.Analyzer{
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 }
 
+type allowPackagesFlags map[string]struct{}
+
+func (apf *allowPackagesFlags) String() string {
+	elem := make([]string, 0, len(*apf))
+	for k, _ := range *apf {
+		elem = append(elem, k)
+	}
+	return strings.Join(elem, ", ")
+}
+func (apf *allowPackagesFlags) Set(s string) error {
+	t := map[string]struct{}{}
+	for _, e := range strings.Split(s, ",") {
+		if e == "" {
+			continue
+		}
+		t[e] = struct{}{}
+	}
+	*apf = t
+	return nil
+}
+
+var allowPackages allowPackagesFlags
+
+func init() {
+	Analyzer.Flags.Var(&allowPackages, "p", "packages allowed to use `panic`")
+}
+
 func run(pass *analysis.Pass) (interface{}, error) {
-	// TODO use command line args
-	allowPackages := map[string]struct{}{"main": {}}
+	if len(allowPackages) == 0 {
+		allowPackages.Set("main")
+	}
 
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
