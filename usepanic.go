@@ -2,6 +2,7 @@ package usepanic
 
 import (
 	"go/ast"
+	"sort"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -21,9 +22,10 @@ type allowPackagesFlags map[string]struct{}
 
 func (apf *allowPackagesFlags) String() string {
 	elem := make([]string, 0, len(*apf))
-	for k, _ := range *apf {
+	for k := range *apf {
 		elem = append(elem, k)
 	}
+	sort.Strings(elem)
 	return strings.Join(elem, ", ")
 }
 func (apf *allowPackagesFlags) Set(s string) error {
@@ -46,7 +48,9 @@ func init() {
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	if len(allowPackages) == 0 {
-		allowPackages.Set("main")
+		if err := allowPackages.Set("main"); err != nil {
+			return nil, err
+		}
 	}
 
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
