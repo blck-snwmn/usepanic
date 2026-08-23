@@ -2,6 +2,7 @@ package usepanic
 
 import (
 	"go/ast"
+	"sort"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -24,6 +25,7 @@ func (apf *allowPackagesFlags) String() string {
 	for k := range *apf {
 		elem = append(elem, k)
 	}
+	sort.Strings(elem)
 	return strings.Join(elem, ", ")
 }
 func (apf *allowPackagesFlags) Set(s string) error {
